@@ -1,14 +1,13 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
 import PySimpleGUI as sg
-import requests, sys, os, time
-
-#PARALLELIZE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+from selenium.webdriver.common.by import By
+import requests, os, time, sys
 
 # Define a function to scrape scientific articles
-def scrape(base_site, search_selector, article_selector, next_page_selector, pdf_container_selector):
+def scrape():
+    base_site = 'https://www.nature.com'
     download_folder = 'downloads'
 
     # Check if a search term is provided as a command-line argument, otherwise prompt the user
@@ -18,9 +17,8 @@ def scrape(base_site, search_selector, article_selector, next_page_selector, pdf
     if not search_term:
         raise SystemExit()
 
-
     # Perform the initial search and get the results URL
-    url = perform_search(base_site, search_term,  search_selector)
+    url = perform_search(base_site, search_term)
 
     # Create the download folder if it doesn't exist
     if not os.path.exists(download_folder):
@@ -32,14 +30,14 @@ def scrape(base_site, search_selector, article_selector, next_page_selector, pdf
         html_text = get_data(url)
 
         # Iterate through the articles on the current page
-        for art_link in get_articles(html_text, base_site, article_selector):
+        for art_link in get_articles(html_text, base_site):
             i += 1
             art_name = get_article_name(art_link)
             print(i, art_name)
-            download_pdf(art_link, art_name, base_site, download_folder, pdf_container_selector)
+            download_pdf(art_link, art_name, base_site, download_folder)
 
         # Get the URL of the next page of results, if available
-        url = get_next_page(html_text, next_page_selector)
+        url = get_next_page(html_text)
         if not url:
             break
         else:
@@ -52,9 +50,9 @@ def get_data(url):
     return html_text
 
 # Function to get the URL of the next page of results
-def get_next_page(html_text, next_page_selector):
-    pagination = html_text.find(*next_page_selector[0])
-    next_page_link = pagination.find(*next_page_selector[1])
+def get_next_page(html_text):
+    pagination = html_text.find('ul', {"class": "c-pagination"})
+    next_page_link = pagination.find('li', {"data-page": "next"}).find('a', {"class": "c-pagination__link"})
 
     if not next_page_link:
         return None
@@ -62,9 +60,9 @@ def get_next_page(html_text, next_page_selector):
     return str(next_page_link['href'])
 
 # Function to extract article links from the current page
-def get_articles(html_text, base_site, article_selector):
-    articles_list = html_text.find(*article_selector[0])
-    articles = articles_list.find_all(*article_selector[1])
+def get_articles(html_text, base_site):
+    articles_list = html_text.find('ul', {"class": "app-article-list-row"})
+    articles = articles_list.find_all('li', {"class": "app-article-list-row__item"})
 
     article_links = [article.find('a', {"class": "c-card__link u-link-inherit"})['href'] for article in articles]
     article_links = [link for link in article_links if link is not None]
@@ -79,11 +77,12 @@ def get_article_name(art_link):
     return art_name
 
 # Function to download a PDF article
-def download_pdf(art_link, art_name, base_site, download_folder, pdf_container_selector):
+def download_pdf(art_link, art_name, base_site, download_folder):
     page_data = get_data(art_link)
-    download_button_div = page_data.find(*pdf_container_selector[0])
+    download_button_div = page_data.find('div', {"class": "c-pdf-container"})
+
     if download_button_div and art_name is not None:
-        download_button_link = download_button_div.find(*pdf_container_selector[1])['href']
+        download_button_link = download_button_div.find('a', {"class": "u-button u-button--full-width u-button--primary u-justify-content-space-between c-pdf-download__link"})['href']
         res = requests.get(base_site + download_button_link)
 
         if res.status_code == 200 and art_name is not None:
@@ -95,32 +94,24 @@ def download_pdf(art_link, art_name, base_site, download_folder, pdf_container_s
             print("FAILED TO DOWNLOAD")
 
 # Function to perform a search and return the search results URL using Selenium
-def perform_search(base_site, search_term, search_selector):
+def perform_search(base_site, search_term):
     # Use Selenium to perform a search and get the search results URL
     driver = webdriver.Chrome()  # You need to have ChromeDriver installed and in your PATH
-    driver.maximize_window()
     driver.get(base_site)
-    search_box = driver.find_element(By.CSS_SELECTOR, search_selector[0])
+    search_box = driver.find_element(By.CSS_SELECTOR, "a[role='button'][class='c-header__link']")
     search_box.click()
-    search_box = driver.find_element(By.CSS_SELECTOR, search_selector[1])
+    search_box = driver.find_element(By.CSS_SELECTOR, "input[class='c-header__input'][id='keywords']")
     search_box.send_keys(search_term)
     search_box.send_keys(Keys.RETURN)
-    
+
     # Wait for the search results page to load
-    #time.sleep(.1)
-    
+    time.sleep(1)
+
     # Get the current URL, which is the search results URL
     search_results_url = driver.current_url
     driver.quit()
-    
+
     return search_results_url
 
-
-# Define journal-specific selectors (modify as needed)
-nature_search_selector = ["a[role='button'][class='c-header__link']", "input[class='c-header__input'][id='keywords']"]
-nature_article_selector = [['ul', {"class": "app-article-list-row"}], ['li', {"class": "app-article-list-row__item"}]]
-nature_next_page_selector = ['ul[class="c-pagination"]', ['a', {"class": "c-pagination__link"}]]
-nature_pdf_container_selector = [['div', {"class": "c-pdf-container"}] , ['a', {"class": "u-button u-button--full-width u-button--primary u-justify-content-space-between c-pdf-download__link"}]]
-
-# Call the main scraping function for a specific journal (Nature.com in this example)
-scrape('https://www.nature.com', nature_search_selector, nature_article_selector, nature_next_page_selector, nature_pdf_container_selector)
+# Call the main scraping function
+scrape()
