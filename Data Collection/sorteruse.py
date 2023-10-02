@@ -28,15 +28,19 @@ def sort(images_path,classes,model):
         i+=1
         if prediction(image, transformer,model,classes) == classes[0]:
             print("HIT")
-            Image.open(image).save(os.path.join('C:\\Users\\Cameron\\Desktop\\Coding\\Projects\Python\\ResearchWebscrapper\\Data Collection\\filtered', os.path.basename(image)))
+            Image.open(image).save(os.path.join(dir_path,'filtered', os.path.basename(image)))
     
 if __name__ == '__main__':
     set_start_method('spawn')
+    cores = 6
     #Categories
-    train_path='C:\\Users\\Cameron\\Desktop\\Coding\\Projects\Python\\ResearchWebscrapper\\Data Collection\\data\\train'
-    test_path='C:\\Users\\Cameron\\Desktop\\Coding\\Projects\Python\\ResearchWebscrapper\\Data Collection\\data\\test'
-    images_path=glob.glob('C:\\Users\\Cameron\\Desktop\\Coding\\Projects\Python\\ResearchWebscrapper\\Data Collection\\to be filtered'+'/*')
-    images_paths = np.array_split(images_path,6)
+    train_path=dir_path + '/data/train'
+    test_path=dir_path + '/data/test'
+    images_path=glob.glob(dir_path+'/to be filtered'+'/*')
+    images_paths = np.array_split(images_path,cores)
+    filtered_save_dir = os.path.join(dir_path,'filtered')
+    if not os.path.isdir(filtered_save_dir):
+        os.mkdir(filtered_save_dir)
 
     root=pathlib.Path(train_path)
     classes=sorted([j.name.split('/')[-1] for j in root.iterdir()])
@@ -51,7 +55,7 @@ if __name__ == '__main__':
     #sort(images_path,classes)
 
     processes = []
-    for i in range(4):
+    for i in range(cores):
         p = Process(target=sort, args=(images_paths[i],classes,model))
         p.start()
         processes.append(p)

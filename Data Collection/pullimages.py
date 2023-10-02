@@ -1,11 +1,12 @@
 import fitz, io, sys, os
-import PySimpleGUI as sg
+#import PySimpleGUI as sg
 from PIL import Image
 from random import random
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Function to extract images from PDF files in a folder
 def pull_all_images():
-    save_dir = ["Data Collection\\data\\train\\Not","Data Collection\\data\\test\\Not"]
+    save_dir = [dir_path + "/data/train/Not",dir_path + "/data/test/Not"]
 
     if False:
         # Check if a folder path is provided as a command-line argument, otherwise prompt the user
@@ -15,7 +16,7 @@ def pull_all_images():
         if not fname:
             raise SystemExit()
     else:
-        fname = "C:\\Users\\Cameron\\Desktop\Coding\\Projects\\Python\\ResearchWebscrapper\\Data Collection\\downloaded pdfs"
+        fname = dir_path + "/downloaded pdfs"
 
     total_images = 0
 
@@ -53,17 +54,19 @@ def extract_images_from_pdf(pdf_path, save_dir):
             image_ext = base_image["ext"]
 
             image = Image.open(io.BytesIO(image_bytes))
-            image_filename = f"{os.path.splitext(os.path.basename(pdf_path))[0]}-{page_index+1}-{image_index}.{image_ext}"
-            if True:
-                if not os.path.exists("Data Collection\\to be filtered"):
-                    os.mkdir("Data Collection\\to be filtered")
-                image_path = os.path.join("Data Collection\\to be filtered", image_filename)
-            elif random() > 0.2:
-                image_path = os.path.join(save_dir[0], image_filename)
-            else:
-                image_path = os.path.join(save_dir[1], image_filename)
-            image.save(image_path)
-            total_images += 1
+            if image.size[0] > 200 and image.size[1] > 200:
+                image_filename = f"{os.path.splitext(os.path.basename(pdf_path))[0]}-{page_index+1}-{image_index}.{image_ext}"
+                if False:
+                    save_path = dir_path + "/to be filtered"
+                    if not os.path.exists(save_path):
+                        os.mkdir(save_path)
+                    image_path = os.path.join(save_path, image_filename)
+                elif random() > 0.2:
+                    image_path = os.path.join(save_dir[0], image_filename)
+                else:
+                    image_path = os.path.join(save_dir[1], image_filename)
+                image.save(image_path)
+                total_images += 1
 
     return total_images
 

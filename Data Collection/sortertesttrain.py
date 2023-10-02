@@ -2,48 +2,56 @@ import torch
 import glob
 import torch.nn as nn
 from sortercnn import *
-from torch.utils.data import DataLoader
 from torch.optim import Adam
 from torch.autograd import Variable
-import torchvision
 import pathlib
+import matplotlib.pyplot as plt
+from PIL import Image
+import numpy as np
+from dataloader import *
 
 #checking for device
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-#Dataloader
-#Path for training and testing directory
-train_path='C:\\Users\\Cameron\\Desktop\\Coding\\Projects\Python\\ResearchWebscrapper\\Data Collection\\data\\train'
-test_path='C:\\Users\\Cameron\\Desktop\\Coding\\Projects\Python\\ResearchWebscrapper\\Data Collection\\data\\test'
-
-train_loader=DataLoader(
-    torchvision.datasets.ImageFolder(train_path,transform=transformer),
-    batch_size=64, shuffle=True
-)
-test_loader=DataLoader(
-    torchvision.datasets.ImageFolder(test_path,transform=transformer),
-    batch_size=32, shuffle=True
-)
 
 #Categories
 root=pathlib.Path(train_path)
 classes=sorted([j.name.split('/')[-1] for j in root.iterdir()])
 print(classes)
+
+#Calculating the size of training and testing images
+train_count=len(glob.glob(train_path+'/*/*.*'))
+test_count=len(glob.glob(test_path+'/*/*.*'))
+print(train_count,test_count)
     
 model=SorterCNN(num_classes=2).to(device)
 
 #Optmizer and loss function
 optimizer=Adam(model.parameters(),lr=0.01,weight_decay=0.0001)
-loss_function=nn.CrossEntropyLoss()
+# desiredweight = 50
+# class_weights = torch.tensor([desiredweight, 1.0]).to(device)
+dataset = torchvision.datasets.ImageFolder(train_path,transform=transformer)
+class_count = [0] * len(dataset.classes)
+for i, (image_path, label) in enumerate(dataset.samples):
+    class_count[label] += 1
+class_weights = torch.Tensor(list(map(float,class_count / np.linalg.norm(class_count))))
+loss_function=nn.CrossEntropyLoss(weight=class_weights)
 
-#Calculating the size of training and testing images
-train_count=len(glob.glob(train_path+'/*/*.jpeg'))+len(glob.glob(train_path+'/*/*.jpg'))+len(glob.glob(train_path+'/*/*.png'))
-test_count=len(glob.glob(test_path+'/*/*.jpeg'))+len(glob.glob(test_path+'/*/*.jpg'))+len(glob.glob(test_path+'/*/*.png'))
-print(train_count,test_count)
+#Show Images
+if not True:
+    imgs = [img for (img,label) in test_loader]
+    #print(imgs[0].numpy().shape)
+    for i in range(len(imgs[0])):
+        print(np.transpose(imgs[0][i].cpu().detach().numpy()))
+        plt.imshow(np.transpose(255*imgs[0][i].cpu().detach().numpy(), (1, 2, 0)).astype(np.uint8))
+        plt.show()
 
-num_epochs=3
+#Use oversampled Data?
+oversample = False
+if oversample:
+    train_loader = oversampled_train_loader
 
 #Model training and saving best model
+num_epochs = 3
 best_accuracy=0.0
 for epoch in range(num_epochs):
     model.iters = 0

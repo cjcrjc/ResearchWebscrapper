@@ -1,5 +1,7 @@
 import torch.nn as nn
 from torchvision.transforms import transforms
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 resolution = 400
 
@@ -14,6 +16,7 @@ class SorterCNN(nn.Module):
             nn.MaxPool2d(2),        # MaxPool
             nn.Conv2d(12, 20, 3,1,1),   # Conv2 (no padding)
             nn.ReLU(),              # ReLU2
+            nn.MaxPool2d(2),        # MaxPool
             nn.Conv2d(20, 32, 3,1,1),   # Conv3 (no padding)
             nn.BatchNorm2d(32),     # BatchNorm3
             nn.ReLU(),              # ReLU3
@@ -23,7 +26,7 @@ class SorterCNN(nn.Module):
 
     def forward(self, input):
         self.iters += 1
-        print(self.iters)
+        print(f"iters: {self.iters}")
         output = self.layers(input)
         #print(output.shape)
         output = output.view(output.size(0), -1)
@@ -37,5 +40,5 @@ transformer=transforms.Compose([
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),  #0-255 to 0-1, numpy to tensors
     transforms.Normalize([0.5,0.5,0.5], # 0-1 to [-1,1] , formula (x-mean)/std
-                        [0.5,0.5,0.5])
+                         [0.5,0.5,0.5])
 ])
