@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-#import PySimpleGUI as sg
+import PySimpleGUI as sg
 from multiprocessing import Process, set_start_method
 import requests, sys, os
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     if not os.path.exists(download_folder):
         os.mkdir(download_folder)
 
-    if False:
+    if True:
         # Check if a search term is provided as a command-line argument, otherwise prompt the user
         search_term = sys.argv[1] if len(sys.argv) == 2 else None
         if not search_term:
