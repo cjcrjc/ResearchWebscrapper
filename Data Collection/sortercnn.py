@@ -3,7 +3,7 @@ from torchvision.transforms import transforms
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-resolution = 400
+resolution = 600
 
 #CNN Sorter Model
 class SorterCNN(nn.Module):
@@ -21,15 +21,15 @@ class SorterCNN(nn.Module):
             nn.BatchNorm2d(32),     # BatchNorm3
             nn.ReLU(),              # ReLU3
         )
-        self.fc = nn.Linear(32 * int(resolution/2 * resolution/2), num_classes)
+        self.fc = nn.Linear(32 * 150 * 150, num_classes)
         self.iters = 0
 
     def forward(self, input):
         self.iters += 1
         print(f"iters: {self.iters}")
         output = self.layers(input)
-        #print(output.shape)
         output = output.view(output.size(0), -1)
+        #print(output.shape)
         output = self.fc(output)
         return output
     

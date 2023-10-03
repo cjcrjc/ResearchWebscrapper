@@ -21,20 +21,18 @@ print(classes)
 #Calculating the size of training and testing images
 train_count=len(glob.glob(train_path+'/*/*.*'))
 test_count=len(glob.glob(test_path+'/*/*.*'))
-print(train_count,test_count)
+print(f"Training file count: {train_count}, Testing file count: {test_count}")
     
 model=SorterCNN(num_classes=2).to(device)
 
 #Optmizer and loss function
 optimizer=Adam(model.parameters(),lr=0.01,weight_decay=0.0001)
-# desiredweight = 50
-# class_weights = torch.tensor([desiredweight, 1.0]).to(device)
 dataset = torchvision.datasets.ImageFolder(train_path,transform=transformer)
 class_count = [0] * len(dataset.classes)
 for i, (image_path, label) in enumerate(dataset.samples):
     class_count[label] += 1
 class_weights = torch.Tensor(list(map(float,class_count / np.linalg.norm(class_count))))
-loss_function=nn.CrossEntropyLoss(weight=class_weights)
+loss_function=nn.CrossEntropyLoss()#weight=class_weights)
 
 #Show Images
 if not True:
@@ -51,7 +49,7 @@ if oversample:
     train_loader = oversampled_train_loader
 
 #Model training and saving best model
-num_epochs = 3
+num_epochs = 10
 best_accuracy=0.0
 for epoch in range(num_epochs):
     model.iters = 0

@@ -120,6 +120,8 @@ if __name__ == '__main__':
         if url:
             url = base_site + url
             urls.append(url)
+            if len(urls) == 20:
+                break
     processes = []
     args_list = [(url,download_folder,base_site,nature_article_selector,nature_pdf_container_selector) for url in urls]
 

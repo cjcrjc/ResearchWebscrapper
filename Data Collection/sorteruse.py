@@ -6,7 +6,7 @@ import glob
 from sortercnn import *
 import numpy as np
 from multiprocessing import Process, set_start_method
-import os
+import os, shutil
 
 #prediction function
 def prediction(img_path,transformer,model,classes):
@@ -27,8 +27,10 @@ def sort(images_path,classes,model):
     for image in images_path:
         i+=1
         if prediction(image, transformer,model,classes) == classes[0]:
-            print("HIT")
-            Image.open(image).save(os.path.join(dir_path,'filtered', os.path.basename(image)))
+            shutil.move(image, os.path.join(dir_path, "keep"))
+        else:
+            shutil.move(image, os.path.join(dir_path, "not"))
+
     
 if __name__ == '__main__':
     set_start_method('spawn')
