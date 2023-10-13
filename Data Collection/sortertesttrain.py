@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import numpy as np
 from dataloader import *
+from datetime import date
 
 #checking for device
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -32,7 +33,7 @@ class_count = [0] * len(dataset.classes)
 for i, (image_path, label) in enumerate(dataset.samples):
     class_count[label] += 1
 class_weights = torch.Tensor(list(map(float,class_count / np.linalg.norm(class_count))))
-loss_function=nn.CrossEntropyLoss()#weight=class_weights)
+loss_function=nn.CrossEntropyLoss(weight=class_weights)
 
 #Show Images
 if not True:
@@ -75,6 +76,9 @@ for epoch in range(num_epochs):
         
         train_accuracy+=int(torch.sum(prediction==labels.data))
         
+        if i % 5 == 0:
+            print(f"TRAIN: Epoch {epoch+1}, Batch {i+1}, Loss: {loss.item()}")
+        
     train_accuracy=train_accuracy/train_count
     train_loss=train_loss/train_count
     
@@ -92,11 +96,9 @@ for epoch in range(num_epochs):
             test_accuracy+=int(torch.sum(prediction==labels.data))
             
         test_accuracy=test_accuracy/test_count
-        print(f'Epoch: {epoch+1}    Train Loss: {train_loss}     Train Accuracy: {train_accuracy}    Test Accuracy: {test_accuracy}')
+        print(f'TEST: Epoch: {epoch+1}    Train Loss: {train_loss}     Train Accuracy: {train_accuracy}    Test Accuracy: {test_accuracy}')
         
         #Save the best model
         if test_accuracy>best_accuracy:
-            torch.save(model.state_dict(),'best.model')
+            torch.save(model.state_dict(),f'{date.today()}-accuracy:{test_accuracy}.model')
             best_accuracy=test_accuracy
-
-#if more data is gathered do a final eval

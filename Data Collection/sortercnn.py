@@ -1,9 +1,24 @@
 import torch.nn as nn
 from torchvision.transforms import transforms
+from torch.nn.functional import *
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 resolution = 600
+
+class RPN(nn.Module):
+    def __init__(self, in_channels, num_anchors):
+        super(RPN, self).__init__()
+        self.conv = nn.Conv2d(in_channels, 256, kernel_size=3, padding=1)
+        self.cls_layer = nn.Conv2d(256, num_anchors, kernel_size=1)
+        self.reg_layer = nn.Conv2d(256, 4 * num_anchors, kernel_size=1)
+
+    def forward(self, x):
+        x = relu(self.conv(x))
+        class_scores = self.cls_layer(x)
+        bbox_deltas = self.reg_layer(x)
+        return class_scores, bbox_deltas
+
 
 #CNN Sorter Model
 class SorterCNN(nn.Module):
@@ -22,16 +37,13 @@ class SorterCNN(nn.Module):
             nn.ReLU(),              # ReLU3
         )
         self.fc = nn.Linear(32 * 150 * 150, num_classes)
-        self.iters = 0
 
     def forward(self, input):
-        self.iters += 1
-        print(f"iters: {self.iters}")
-        output = self.layers(input)
-        output = output.view(output.size(0), -1)
-        #print(output.shape)
-        output = self.fc(output)
-        return output
+        x = self.layers(input)
+        x = x.view(x.size(0), -1)
+        #print(x.shape)
+        x = self.fc(x)
+        return x
     
 #Transforms
 transformer=transforms.Compose([
