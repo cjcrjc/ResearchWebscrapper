@@ -1,0 +1,85 @@
+import cv2
+import os
+import pandas as pd
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+bounding = True
+
+# Read in the bounding box information from a previously saved Excel file
+if True:#os.path.isfile(dir_path+'\\RCNN\\bounding_boxes.xlsx'):
+    bounding_boxes = pd.read_excel('RCNN\\bounding_boxes.xlsx')
+else:
+    # Create an empty DataFrame if the file doesn't exist
+    data = {'image': [], 'x1': [], 'y1': [], 'x2': [], 'y2': []}
+    bounding_boxes = pd.DataFrame(data)
+
+# Variables to keep track of the clicks
+click_count = 0
+start_x, start_y = 0, 0
+
+def Mouse_Event(event, x, y, flags, param):
+    global click_count, start_x, start_y, bounding_boxes, img
+    if event == cv2.EVENT_LBUTTONDOWN:
+        if click_count == 0:
+            start_x, start_y = x, y
+            click_count += 1
+        else:
+            end_x, end_y = x, y
+            click_count = 0
+            # Store the bounding box information in the DataFrame
+            if end_x-start_x < 0 or end_y-start_y < 0:
+                print("negative bounding box")
+                return
+            if abs(end_x-start_x) < 25 or abs(end_y-start_y) < 25:
+                print("small selection error")
+                return
+            info = {'image': img_path,
+                'x1': start_x,
+                'y1': start_y,
+                'x2': end_x,
+                'y2': end_y}
+            bounding_boxes = pd.concat([bounding_boxes, pd.DataFrame([info])], ignore_index=True)
+            print(f'Bounding Box added: (X1={start_x}, Y1={start_y}, X2={end_x}, Y2={end_y})')
+            # Draw bounding box on the current image and display it
+            img = cv2.rectangle(img, (start_x, start_y), (end_x, end_y), (0, 255, 0), 2)
+            cv2.imshow('frame', img)
+
+# Iterate through the images
+for img_name in os.listdir(os.path.join(dir_path, "train")):
+    img_path = os.path.join(dir_path, "train", img_name)
+    img = cv2.imread(img_path)
+    # Retrieve bounding box information for the current image and draw them
+    image_boxes = []
+    for i in range(len(bounding_boxes['image'])):
+        if bounding_boxes['image'][i] == img_path:
+            image_boxes.append([bounding_boxes['x1'][i],bounding_boxes['y1'][i],bounding_boxes['x2'][i],bounding_boxes['y2'][i]])
+    for i in range(len(image_boxes)):
+        img = cv2.rectangle(img, (image_boxes[i][0], image_boxes[i][1]), (image_boxes[i][2], image_boxes[i][3]), (0, 255, 0), 2)
+    breakout = False
+    if len(image_boxes) != 0:
+        pass
+    else:
+        cv2.imshow('frame', img)
+        cv2.setMouseCallback('frame', Mouse_Event)
+        while True:
+            key = cv2.waitKey(1)
+            if key == 27:
+                breakout = True
+                break
+            elif key == ord('f'):
+                info = {'image': img_path,
+                    'x1': 0,
+                    'y1': 0,
+                    'x2': img.shape[1],
+                    'y2': img.shape[0]}
+                bounding_boxes = pd.concat([bounding_boxes, pd.DataFrame([info])], ignore_index=True)
+                break
+            elif key in range(1,1000):
+                break
+        cv2.destroyAllWindows()
+        bounding_boxes.to_excel('RCNN\\bounding_boxes.xlsx', index=False)
+    if breakout:
+        break
+
+# Save the bounding box information to an Excel file
+print('Bounding box information saved to bounding_boxes.xlsx')
