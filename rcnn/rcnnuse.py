@@ -46,5 +46,6 @@ def rcnn_crop():
         for i in range(len(boxes)):
             cropped_image = img.crop(tuple(boxes[i]))
             cropped_image.save(os.path.join(dir_path, "cropped", img_name.replace(".", f"-{i}.")))
+        print(f"[+] Cropped {i} subimages out of:", os.path.basename(img_path))
         
         os.remove(folder+"/"+img_path)

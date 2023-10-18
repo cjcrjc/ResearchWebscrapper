@@ -25,8 +25,10 @@ def sort(images_path,classes,model, filtered_save_dir):
     for image in images_path:
         i+=1
         if prediction(image, sorter.transformer,model,classes) == classes[0]:
+            print("[+] Passed:", os.path.basename(image))
             shutil.move(image, filtered_save_dir)
         else:
+            print("[-] Failed:", os.path.basename(image))
             os.remove(image)
    
 def run_sorter():

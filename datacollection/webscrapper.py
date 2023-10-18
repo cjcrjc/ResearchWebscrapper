@@ -11,13 +11,12 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 def scrape_page(url, download_folder, base_site, article_selector, pdf_container_selector):
     i = 0
     html_text = get_data(url)
-    print("scraping" + url)
 
     # Iterate through the articles on the current page
     for art_link in get_articles(html_text, base_site, article_selector):
         i += 1
         art_name = get_article_name(art_link)
-        print(i, art_name)
+        print("[+]", i, art_name)
         download_pdf(art_link, art_name, base_site, download_folder, pdf_container_selector)
 
 # Function to retrieve HTML data from a URL using requests and BeautifulSoup
@@ -94,8 +93,6 @@ def perform_search(base_site, search_term, search_selector):
 
 # Main Logic and Parallelization
 def scrape():
-    # set_start_method('spawn')
-
     # Define journal-specific selectors (modify as needed)
     nature_search_selector = ["a[role='button'][class='c-header__link']", "input[class='c-header__input'][id='keywords']"]
     nature_article_selector = [['ul', {"class": "app-article-list-row"}], ['li', {"class": "app-article-list-row__item"}]]
@@ -108,15 +105,13 @@ def scrape():
     if not os.path.exists(download_folder):
         os.mkdir(download_folder)
 
-    if True:
-        # Check if a search term is provided as a command-line argument, otherwise prompt the user
-        search_term = sys.argv[1] if len(sys.argv) == 2 else None
-        if not search_term:
-            search_term = sg.popup_get_text("Enter Search Term:", title="Webscraper Search Term")
-        if not search_term:
-            raise SystemExit()
-    else:
-        search_term = "nanostructure surface image processing spin coating"
+    # Check if a search term is provided as a command-line argument, otherwise prompt the user
+    search_term = sys.argv[1] if len(sys.argv) == 2 else None
+    if not search_term:
+        search_term = sg.popup_get_text("Enter Search Term:", title="Webscraper Search Term")
+    if not search_term:
+        raise SystemExit()
+    
     # Perform the initial search and get the results URL
     url = perform_search(base_site, search_term, nature_search_selector)
     urls = [base_site + url]
@@ -128,11 +123,11 @@ def scrape():
             urls.append(url)
             if len(urls) == 20:
                 break
+
     processes = []
     args_list = [(url,download_folder,base_site,nature_article_selector,nature_pdf_container_selector) for url in urls]
-
+    # Sometimes gives error: Max retries exceeded with url, in this case it will just not scrape page=1 of pages
     for i in range(len(urls)):
-        print(args_list[i])
         p = Process(target=scrape_page, args= args_list[i])
         p.start()
         processes.append(p)
