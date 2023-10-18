@@ -63,6 +63,11 @@ def download_pdf(art_link, art_name, base_site, download_folder, pdf_container_s
 
         if res.status_code == 200 and art_name is not None:
             pdf_path = os.path.join(download_folder, f"{art_name[:25]}.pdf")
+            #Make legal filename
+            illegal_characters = ["#","%","&","{","}","\\","<",">","*","$","!","'",'"',":","@","+","`","|","="]
+            for char in illegal_characters:
+                if char in pdf_path:
+                    pdf_path.replace(char, " ")
 
             with open(pdf_path, 'wb') as pdf:
                 pdf.write(res.content)
@@ -88,8 +93,9 @@ def perform_search(base_site, search_term, search_selector):
     return search_results_url
 
 # Main Logic and Parallelization
-if __name__ == '__main__':
-    set_start_method('spawn')
+def scrape():
+    # set_start_method('spawn')
+
     # Define journal-specific selectors (modify as needed)
     nature_search_selector = ["a[role='button'][class='c-header__link']", "input[class='c-header__input'][id='keywords']"]
     nature_article_selector = [['ul', {"class": "app-article-list-row"}], ['li', {"class": "app-article-list-row__item"}]]
@@ -133,4 +139,4 @@ if __name__ == '__main__':
 
     for process in processes:
         process.join()
-    print("FINISHED")
+    print("Finished Scrapping")

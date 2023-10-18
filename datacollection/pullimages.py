@@ -1,16 +1,10 @@
 import fitz, io, sys, os
-#import PySimpleGUI as sg
+import PySimpleGUI as sg
 from PIL import Image
-from random import random
-import shutil
-from zipper import zip, unzip
-
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Function to extract images from PDF files in a folder
 def pull_all_images():
-    save_dir = [dir_path + "/data/train/Not", dir_path + "/data/test/Not"]
-
     if False:
         # Check if a folder path is provided as a command-line argument, otherwise prompt the user
         fname = sys.argv[1] if len(sys.argv) == 2 else None
@@ -29,7 +23,7 @@ def pull_all_images():
 
         # Check if the file is not empty
         if os.path.getsize(file_path) > 0:
-            total_images += extract_images_from_pdf(file_path, save_dir)
+            total_images += extract_images_from_pdf(file_path)
         
         os.remove(file_path)
         
@@ -37,7 +31,7 @@ def pull_all_images():
     print(f"Total images extracted: {total_images}")
 
 # Function to extract images from a PDF file and save them to a directory
-def extract_images_from_pdf(pdf_path, save_dir):
+def extract_images_from_pdf(pdf_path):
     pdf_file = fitz.open(pdf_path)
     total_images = 0
 
@@ -62,15 +56,10 @@ def extract_images_from_pdf(pdf_path, save_dir):
             image = Image.open(io.BytesIO(image_bytes))
             if image.size[0] > 200 and image.size[1] > 200 and is_mostly_black(image, threshold=0.8):
                 image_filename = f"{os.path.splitext(os.path.basename(pdf_path))[0]}-{page_index+1}-{image_index}.{image_ext}"
-                if True:
-                    save_path = dir_path + "/to be filtered"
-                    if not os.path.exists(save_path):
-                        os.mkdir(save_path)
-                    image_path = os.path.join(save_path, image_filename)
-                elif random() > 0.2:
-                    image_path = os.path.join(save_dir[0], image_filename)
-                else:
-                    image_path = os.path.join(save_dir[1], image_filename)
+                save_path = dir_path + "/images"
+                if not os.path.exists(save_path):
+                    os.mkdir(save_path)
+                image_path = os.path.join(save_path, image_filename)
                 image.save(image_path)
                 total_images += 1
 
@@ -84,6 +73,3 @@ def is_mostly_black(image, threshold=0.8):
 
     # Check if the percentage is below the threshold
     return percentage_black < threshold
-
-# Call the main function to extract images from PDF files
-pull_all_images()
