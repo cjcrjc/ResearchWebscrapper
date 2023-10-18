@@ -7,17 +7,18 @@ import torch
 from PIL import Image
 import torchvision
 
+device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = fasterrcnn_resnet50_fpn()
 in_features = model.roi_heads.box_predictor.cls_score.in_features
 model.roi_heads.box_predictor = faster_rcnn.FastRCNNPredictor(in_features, 2)
-model.load_state_dict(torch.load("2023-10-16.model"))
+model.load_state_dict(torch.load("3. RCNN/2023-10-17.model",device))
 
 
-folder = os.getcwd() + "\\Data Collection\\keep"
+folder = os.getcwd() + "/2. CNN Sorter/data/train/Nanostructure"
 transform = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
 for img_path in os.listdir(folder):
     model.eval()
-    img = Image.open(folder+"\\"+img_path)
+    img = Image.open(folder+"/"+img_path)
     image = transform(img)
     img = np.array(img)
     #print(image.shape)
@@ -30,7 +31,7 @@ for img_path in os.listdir(folder):
             keepboxes.append(boxes[i])
     boxes = keepboxes
     for i in range(len(boxes)):
-        cv2.rectangle(img, tuple(boxes[i][0:2]), tuple(boxes[i][2:4]),color=(0,255,  0), thickness=4)
+        cv2.rectangle(img, tuple(boxes[i][0:2]), tuple(boxes[i][2:4]),color=(255, 0, 0), thickness=2)
     plt.figure(figsize=(20,30))
     plt.imshow(img)
     plt.show()

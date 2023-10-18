@@ -42,7 +42,7 @@ in_features = model.roi_heads.box_predictor.cls_score.in_features
 model.roi_heads.box_predictor = faster_rcnn.FastRCNNPredictor(in_features, 2) # 2 for object and background 
 model.eval()
 
-df = pd.read_excel('RCNN\\bounding_boxes.xlsx')
+df = pd.read_excel('3. RCNN/bounding_boxes.xlsx')
 unique_imgs = df.image.unique()
 train_inds, val_inds = train_test_split(range(unique_imgs.shape[0]), test_size=0.1)
 
@@ -82,7 +82,7 @@ for epoch in range(num_epochs):
 
     print(f'TEST: Epoch: {epoch}    Train Loss: {loss.item()}')
     #Save the best model
-    torch.save(model.state_dict(),f'2. RCNN\\{date.today()}.model')
+    torch.save(model.state_dict(),f'3. RCNN/{date.today()}.model')
     
 # Evaluation on testing dataset
 model.eval()

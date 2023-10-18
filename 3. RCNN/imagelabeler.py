@@ -4,7 +4,7 @@ import pandas as pd
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 bounding = True
-bounding_boxes = pd.read_excel('RCNN\\bounding_boxes.xlsx')
+bounding_boxes = pd.read_excel('3. RCNN/bounding_boxes.xlsx')
 
 click_count = 0
 start_x, start_y = 0, 0
@@ -65,7 +65,7 @@ for img_name in os.listdir(os.path.join(dir_path, "train")):
             elif key in range(1,1000):
                 break
         cv2.destroyAllWindows()
-        bounding_boxes.to_excel('RCNN\\bounding_boxes.xlsx', index=False)
+        bounding_boxes.to_excel('3. RCNN/bounding_boxes.xlsx', index=False)
     if breakout:
         break
 

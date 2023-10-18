@@ -100,5 +100,5 @@ for epoch in range(num_epochs):
         
         #Save the best model
         if test_accuracy>best_accuracy:
-            torch.save(model.state_dict(),f'1. Data Collection\\{date.today()}-accuracy:{test_accuracy}.model')
+            torch.save(model.state_dict(),f'1. Data Collection/{date.today()}-accuracy:{test_accuracy}.model')
             best_accuracy=test_accuracy
