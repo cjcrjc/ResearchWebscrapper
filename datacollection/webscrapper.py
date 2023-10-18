@@ -96,7 +96,7 @@ if __name__ == '__main__':
     nature_next_page_selector = [['li', {"class":"c-pagination__item", "data-page":"next"}], ['a', {"class": "c-pagination__link"}]]
     nature_pdf_container_selector = [['div', {"class": "c-pdf-container"}] , ['a', {"class": "u-button u-button--full-width u-button--primary u-justify-content-space-between c-pdf-download__link"}]]
 
-    download_folder = dir_path + '/downloaded pdfs'
+    download_folder = dir_path + '/downloaded'
     base_site = 'https://www.nature.com'
     # Create the download folder if it doesn't exist
     if not os.path.exists(download_folder):

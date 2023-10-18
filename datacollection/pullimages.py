@@ -3,12 +3,13 @@ import fitz, io, sys, os
 from PIL import Image
 from random import random
 import shutil
+from zipper import zip, unzip
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Function to extract images from PDF files in a folder
 def pull_all_images():
-    save_dir = [dir_path + "/data/train/Not",dir_path + "/data/test/Not"]
+    save_dir = [dir_path + "/data/train/Not", dir_path + "/data/test/Not"]
 
     if False:
         # Check if a folder path is provided as a command-line argument, otherwise prompt the user
@@ -18,7 +19,7 @@ def pull_all_images():
         if not fname:
             raise SystemExit()
     else:
-        fname = dir_path + "/downloaded pdfs"
+        fname = dir_path + "/downloaded"
 
     total_images = 0
 
@@ -30,7 +31,7 @@ def pull_all_images():
         if os.path.getsize(file_path) > 0:
             total_images += extract_images_from_pdf(file_path, save_dir)
         
-        shutil.move(file_path, os.path.join(dir_path, 'extracted pdfs', os.path.basename(file_path)))
+        os.remove(file_path)
         
 
     print(f"Total images extracted: {total_images}")
