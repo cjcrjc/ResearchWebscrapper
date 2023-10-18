@@ -4,3 +4,6 @@ from os import path, remove
 def zip(path):
     shutil.make_archive(path, 'zip', path)
     remove(path)
+
+def unzip(path):
+    shutil.unpack_archive(path, path)
