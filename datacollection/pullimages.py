@@ -1,6 +1,8 @@
 import fitz, io, sys, os
 import PySimpleGUI as sg
 from PIL import Image
+
+# Get the path of the current directory
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Function to extract images from PDF files in a folder
@@ -28,7 +30,7 @@ def pull_all_images():
         os.remove(file_path)
         
 
-    print(f"Total images extracted: {total_images}")
+    print(f"IMAGE EXTRACTION FINISHED ** Total images extracted: {total_images}")
 
 # Function to extract images from a PDF file and save them to a directory
 def extract_images_from_pdf(pdf_path):
@@ -65,6 +67,7 @@ def extract_images_from_pdf(pdf_path):
 
     return total_images
 
+# Function to determine if an image is mostly black based on a threshold
 def is_mostly_black(image, threshold=0.8):
     # Calculate the percentage of black pixels
     width, height = image.size

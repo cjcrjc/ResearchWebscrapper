@@ -5,12 +5,14 @@ from selenium.webdriver.common.by import By
 import PySimpleGUI as sg
 from multiprocessing import Process, set_start_method
 import requests, sys, os
+
+# Get the path of the current directory
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Define a function to scrape scientific articles
-def scrape_page(url, download_folder, base_site, article_selector, pdf_container_selector):
+def scrape_page(url_data, download_folder, base_site, article_selector, pdf_container_selector):
     i = 0
-    html_text = get_data(url)
+    html_text = url_data
 
     # Iterate through the articles on the current page
     for art_link in get_articles(html_text, base_site, article_selector):
@@ -28,8 +30,9 @@ def get_data(url):
 # Function to get the URL of the next page of results
 def get_next_page(html_text, next_page_selector):
     pagination = html_text.find(*next_page_selector[0])
+    if not pagination:
+        return None
     next_page_link = pagination.find(*next_page_selector[1])
-
     if not next_page_link:
         return None
 
@@ -62,7 +65,7 @@ def download_pdf(art_link, art_name, base_site, download_folder, pdf_container_s
 
         if res.status_code == 200 and art_name is not None:
             pdf_path = os.path.join(download_folder, f"{art_name[:25]}.pdf")
-            #Make legal filename
+            # Make a legal filename
             illegal_characters = ["#","%","&","{","}","\\","<",">","*","$","!","'",'"',":","@","+","`","|","="]
             for char in illegal_characters:
                 if char in pdf_path:
@@ -111,13 +114,19 @@ def scrape():
         search_term = sg.popup_get_text("Enter Search Term:", title="Webscraper Search Term")
     if not search_term:
         raise SystemExit()
+    # Good search term for end-to-end testing
+    #search_term = "priming self assembly blocks copolymers nanomaterials imaging defect"
     
     # Perform the initial search and get the results URL
     url = perform_search(base_site, search_term, nature_search_selector)
     urls = [base_site + url]
     while url:
-        print(url)
-        url = get_next_page(get_data(url), nature_next_page_selector)
+        print(f"[+] Added to scrape list: {url}")
+        if len(urls) == 1:
+            firstpagedata = get_data(url)
+            url = get_next_page(firstpagedata, nature_next_page_selector)
+        else:
+            url = get_next_page(get_data(url), nature_next_page_selector)
         if url:
             url = base_site + url
             urls.append(url)
@@ -125,7 +134,8 @@ def scrape():
                 break
 
     processes = []
-    args_list = [(url,download_folder,base_site,nature_article_selector,nature_pdf_container_selector) for url in urls]
+    args_list = [(get_data(url), download_folder, base_site, nature_article_selector, nature_pdf_container_selector) for url in urls[1:]]
+    args_list.insert(0, (firstpagedata, download_folder, base_site, nature_article_selector, nature_pdf_container_selector))
     # Sometimes gives error: Max retries exceeded with url, in this case it will just not scrape page=1 of pages
     for i in range(len(urls)):
         p = Process(target=scrape_page, args= args_list[i])
@@ -134,4 +144,4 @@ def scrape():
 
     for process in processes:
         process.join()
-    print("Finished Scrapping")
+    print("FISHING SCRAPPING")
