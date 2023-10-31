@@ -82,9 +82,14 @@ def perform_search(base_site, search_term, search_selector):
     driver = webdriver.Chrome()  # You need to have ChromeDriver installed and in your PATH
     #driver.maximize_window()
     driver.get(base_site)
-    search_box = driver.find_element(By.CSS_SELECTOR, search_selector[0])
-    search_box.click()
+    try:
+        accept_box = driver.find_element(By.CSS_SELECTOR, search_selector[0])
+        accept_box.click()
+    except Exception as e:
+        pass
     search_box = driver.find_element(By.CSS_SELECTOR, search_selector[1])
+    search_box.click()
+    search_box = driver.find_element(By.CSS_SELECTOR, search_selector[2])
     search_box.send_keys(search_term)
     search_box.send_keys(Keys.RETURN)
     
@@ -97,7 +102,7 @@ def perform_search(base_site, search_term, search_selector):
 # Main Logic and Parallelization
 def scrape():
     # Define journal-specific selectors (modify as needed)
-    nature_search_selector = ["a[role='button'][class='c-header__link']", "input[class='c-header__input'][id='keywords']"]
+    nature_search_selector = ["button[class='cc-button cc-button--secondary cc-button--contrast cc-banner__button cc-banner__button-accept']", "a[role='button'][class='c-header__link']", "input[class='c-header__input'][id='keywords']"]
     nature_article_selector = [['ul', {"class": "app-article-list-row"}], ['li', {"class": "app-article-list-row__item"}]]
     nature_next_page_selector = [['li', {"class":"c-pagination__item", "data-page":"next"}], ['a', {"class": "c-pagination__link"}]]
     nature_pdf_container_selector = [['div', {"class": "c-pdf-container"}] , ['a', {"class": "u-button u-button--full-width u-button--primary u-justify-content-space-between c-pdf-download__link"}]]

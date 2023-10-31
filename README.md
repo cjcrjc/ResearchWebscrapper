@@ -8,5 +8,6 @@ This repository contains a collection of Python scripts and programs for various
 
 Usage
 To use these scripts, make sure to install the required dependancies with:
-pip install torch torchvision tkinter opencv-python pynput matplotlib numpy Pillow multiprocess fitz requires.io PySimpleGUI selenium bs4 requests pandas scikit-learn
+pip install torch torchvision opencv-python pynput matplotlib numpy Pillow multiprocess pymupdf requires.io PySimpleGUI selenium bs4 requests pandas scikit-learn frontend
+sudo apt-get install python3-tk
 Then just run the run.py file in the main directory and provide the desired search keyword when prompted. It will take a few minutes to process end-to-end but after it's finished there will be a folder, rcnn/cropped, containing desired SEM images.

@@ -37,6 +37,7 @@ def sort(images_path, classes, model, filtered_save_dir):
 def run_sorter():
     print("BINARY SORT STARTED")
     freeze_support()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     cores = cpu_count()
     images_path = glob.glob(os.getcwd() + '/datacollection/images/*')
     images_paths = np.array_split(images_path, cores)
@@ -58,7 +59,7 @@ def run_sorter():
         if res in model and int(model[-8:-6]) > accuracy:
             best_model = model
             accuracy = int(model[-8:-6])
-    checkpoint = torch.load(os.path.join(dir_path, best_model))
+    checkpoint = torch.load(os.path.join(dir_path, best_model), map_location=device)
 
     # Load the model
     model = sorter.SorterCNN(num_classes=2)
