@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import PySimpleGUI as sg
-from multiprocessing import Process, set_start_method
+from multiprocessing import Process, set_start_method, cpu_count
 import requests, sys, os
 
 # Get the path of the current directory
@@ -101,6 +101,7 @@ def perform_search(base_site, search_term, search_selector):
 
 # Main Logic and Parallelization
 def scrape():
+    cores = cpu_count()
     # Define journal-specific selectors (modify as needed)
     nature_search_selector = ["button[class='cc-button cc-button--secondary cc-button--contrast cc-banner__button cc-banner__button-accept']",
                                "a[role='button'][class='c-header__link c-header__link--search']", "input[class='c-header__input'][id='keywords']"]
@@ -136,14 +137,14 @@ def scrape():
         if url:
             url = base_site + url
             urls.append(url)
-            if len(urls) == 20:
+            if len(urls) == cores:
                 break
 
     processes = []
     args_list = [(get_data(url), download_folder, base_site, nature_article_selector, nature_pdf_container_selector) for url in urls[1:]]
     args_list.insert(0, (firstpagedata, download_folder, base_site, nature_article_selector, nature_pdf_container_selector))
     # Sometimes gives error: Max retries exceeded with url, in this case it will just not scrape page=1 of pages
-    for i in range(len(urls)):
+    for i in range(cores):
         p = Process(target=scrape_page, args= args_list[i])
         p.start()
         processes.append(p)
