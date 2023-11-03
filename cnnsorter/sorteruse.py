@@ -36,7 +36,6 @@ def sort(images_path, classes, model, filtered_save_dir):
 
 def run_sorter():
     print("BINARY SORT STARTED")
-    set_start_method('spawn')
     freeze_support()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     cores = cpu_count()
