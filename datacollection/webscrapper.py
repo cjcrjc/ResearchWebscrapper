@@ -101,7 +101,6 @@ def perform_search(base_site, search_term, search_selector):
 
 # Main Logic and Parallelization
 def scrape():
-    set_start_method('spawn')
     # Define journal-specific selectors (modify as needed)
     nature_search_selector = ["button[class='cc-button cc-button--secondary cc-button--contrast cc-banner__button cc-banner__button-accept']",
                                "a[role='button'][class='c-header__link c-header__link--search']", "input[class='c-header__input'][id='keywords']"]

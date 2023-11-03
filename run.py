@@ -2,13 +2,14 @@ from datacollection.webscrapper import scrape
 from datacollection.pullimages import pull_all_images
 from cnnsorter.sorteruse import run_sorter
 from rcnn.rcnnuse import rcnn_crop
-from multiprocessing import freeze_support
+from multiprocessing import freeze_support, set_start_method
 from os import path
 from shutil import rmtree
 dir_path = path.dirname(path.realpath(__file__))
 
 if __name__ == '__main__':
     freeze_support()
+    set_start_method('spawn')
     
     #Scrape articles from nature.com
     scrape()
