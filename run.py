@@ -8,8 +8,8 @@ from shutil import rmtree
 dir_path = path.dirname(path.realpath(__file__))
 
 if __name__ == '__main__':
-    freeze_support()
     set_start_method('spawn')
+    freeze_support()
     
     #Scrape articles from nature.com
     scrape()
