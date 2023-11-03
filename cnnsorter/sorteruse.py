@@ -2,7 +2,7 @@ import torch, glob, time, os, shutil
 from torch.autograd import Variable
 from PIL import Image
 import numpy as np
-from multiprocessing import Process, cpu_count, freeze_support
+from multiprocessing import Process, cpu_count, freeze_support, set_start_method
 import cnnsorter.sortercnn as sorter
 from datetime import datetime, date
 
@@ -36,6 +36,7 @@ def sort(images_path, classes, model, filtered_save_dir):
 
 def run_sorter():
     print("BINARY SORT STARTED")
+    set_start_method('spawn')
     freeze_support()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     cores = cpu_count()
