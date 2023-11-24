@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import PySimpleGUI as sg
-from multiprocessing import Process, set_start_method
+from multiprocessing import Process
 import requests, sys, os
 
 # Get the path of the current directory
@@ -90,11 +90,12 @@ def perform_search(base_site, search_term, search_selector):
     search_box = driver.find_element(By.CSS_SELECTOR, search_selector[1])
     search_box.click()
     search_box = driver.find_element(By.CSS_SELECTOR, search_selector[2])
-    search_box.send_keys(search_term)
+    search_box.send_keys(search_term.strip())
     search_box.send_keys(Keys.RETURN)
     
     # Get the current URL, which is the search results URL
     search_results_url = driver.current_url
+    
     driver.quit()
     
     return search_results_url

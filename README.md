@@ -8,7 +8,8 @@ This repository contains a collection of Python scripts and programs for various
 
 Usage
 To use these scripts, make sure to install the required dependancies with:
-pip install torch torchvision opencv-python pynput matplotlib numpy Pillow multiprocess pymupdf requires.io PySimpleGUI selenium bs4 requests pandas scikit-learn frontend
-sudo apt-get install python3-tk
+pip install torch torchvision opencv-python pynput matplotlib numpy Pillow pymupdf requires.io PySimpleGUI selenium bs4 requests pandas scikit-learn frontend
+if on linux:    
+    sudo apt-get install python3-tk
 You also need to have ChromeWebdriver installed in PATH environment variables
 Then just run the run.py file in the main directory and provide the desired search keyword when prompted. It will take a few minutes to process end-to-end but after it's finished there will be a folder, rcnn/cropped, containing desired SEM images.

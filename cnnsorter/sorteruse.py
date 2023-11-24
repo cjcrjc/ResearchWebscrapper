@@ -2,7 +2,7 @@ import torch, glob, time, os, shutil
 from torch.autograd import Variable
 from PIL import Image
 import numpy as np
-from multiprocessing import Process, cpu_count, freeze_support, set_start_method
+from multiprocessing import Process, cpu_count
 import cnnsorter.sortercnn as sorter
 from datetime import datetime, date
 
@@ -70,7 +70,6 @@ def run_sorter():
         p = Process(target=sort, args=(images_paths[i], classes, model, filtered_save_dir))
         p.start()
         processes.append(p)
-        time.sleep(2)
 
     for process in processes:
         process.join()
