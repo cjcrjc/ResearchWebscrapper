@@ -78,25 +78,29 @@ def download_pdf(art_link, art_name, base_site, download_folder, pdf_container_s
 
 # Function to perform a search and return the search results URL using Selenium
 def perform_search(base_site, search_term, search_selector):
-    # Use Selenium to perform a search and get the search results URL
-    driver = webdriver.Chrome()  # You need to have ChromeDriver installed and in your PATH
-    #driver.maximize_window()
-    driver.get(base_site)
-    try:
-        accept_box = driver.find_element(By.CSS_SELECTOR, search_selector[0])
-        accept_box.click()
-    except Exception as e:
-        pass
-    search_box = driver.find_element(By.CSS_SELECTOR, search_selector[1])
-    search_box.click()
-    search_box = driver.find_element(By.CSS_SELECTOR, search_selector[2])
-    search_box.send_keys(search_term.strip())
-    search_box.send_keys(Keys.RETURN)
-    
-    # Get the current URL, which is the search results URL
-    search_results_url = driver.current_url
-    
-    driver.quit()
+    if False:
+        # Use Selenium to perform a search and get the search results URL
+        driver = webdriver.Chrome()  # You need to have ChromeDriver installed and in your PATH
+        #driver.maximize_window()
+        driver.get(base_site)
+        try:
+            accept_box = driver.find_element(By.CSS_SELECTOR, search_selector[0])
+            accept_box.click()
+        except Exception as e:
+            pass
+        search_box = driver.find_element(By.CSS_SELECTOR, search_selector[1])
+        search_box.click()
+        search_box = driver.find_element(By.CSS_SELECTOR, search_selector[2])
+        search_box.send_keys(search_term.strip())
+        search_box.send_keys(Keys.RETURN)
+        
+        # Get the current URL, which is the search results URL
+        search_results_url = driver.current_url
+        
+        driver.quit()
+    else:
+        search_term = search_term.strip().replace(" ", "+")
+        search_results_url = f"https://www.nature.com/search?q={search_term}&journal="
     
     return search_results_url
 
