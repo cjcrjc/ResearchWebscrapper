@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import PySimpleGUI as sg
 from multiprocessing import Process
-import requests, sys, os
+import requests, sys, os, platform
 
 # Get the path of the current directory
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -147,12 +147,19 @@ def scrape():
     processes = []
     args_list = [(get_data(url), download_folder, base_site, nature_article_selector, nature_pdf_container_selector) for url in urls[1:]]
     args_list.insert(0, (firstpagedata, download_folder, base_site, nature_article_selector, nature_pdf_container_selector))
-    # Sometimes gives error: Max retries exceeded with url, in this case it will just not scrape page=1 of pages
-    for i in range(len(urls)):
-        p = Process(target=scrape_page, args= args_list[i])
-        p.start()
-        processes.append(p)
 
-    for process in processes:
-        process.join()
-    print("FISHING SCRAPPING")
+    # Sometimes gives error: Max retries exceeded with url, in this case it will just not scrape page=1 of pages
+    if platform.system() == 'Linux':
+        for i in range(len(urls)):
+            scrape_page(*args_list[i])
+            
+    else:
+        for i in range(len(urls)):
+            p = Process(target=scrape_page, args= args_list[i])
+            p.start()
+            processes.append(p)
+
+        for process in processes:
+            process.join()
+
+    print("FINISHED SCRAPPING")
