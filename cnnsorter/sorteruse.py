@@ -1,4 +1,4 @@
-import torch, glob, time, os, shutil
+import torch, glob, time, os, shutil, platform
 from torch.autograd import Variable
 from PIL import Image
 import numpy as np
@@ -65,13 +65,16 @@ def run_sorter():
     model.load_state_dict(checkpoint)
     model.eval()
 
-    processes = []
-    for i in range(cores):
-        p = Process(target=sort, args=(images_paths[i], classes, model, filtered_save_dir))
-        p.start()
-        processes.append(p)
+    if platform.system == 'Linux':
+        sort(images_path, classes, model, filtered_save_dir)
+    else:
+        processes = []
+        for i in range(cores):
+            p = Process(target=sort, args=(images_paths[i], classes, model, filtered_save_dir))
+            p.start()
+            processes.append(p)
 
-    for process in processes:
-        process.join()
+        for process in processes:
+            process.join()
 
     print("PRELIMINARY SORTING FINISHED")
