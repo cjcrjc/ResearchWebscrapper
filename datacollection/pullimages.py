@@ -1,6 +1,8 @@
 import fitz, io, sys, os
 import PySimpleGUI as sg
-from PIL import Image
+from PIL import Image, ImageFile
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # Get the path of the current directory
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -52,18 +54,20 @@ def extract_images_from_pdf(pdf_path):
             xref = img[0]
             base_image = pdf_file.extract_image(xref)
 
-            image_bytes = base_image["image"]
-            image_ext = base_image["ext"]
+            if not isinstance(base_image, bool):
 
-            image = Image.open(io.BytesIO(image_bytes))
-            if image.size[0] > 200 and image.size[1] > 200 and is_mostly_black(image, threshold=0.8):
-                image_filename = f"{os.path.splitext(os.path.basename(pdf_path))[0]}-{page_index+1}-{image_index}.{image_ext}"
-                save_path = dir_path + "/images"
-                if not os.path.exists(save_path):
-                    os.mkdir(save_path)
-                image_path = os.path.join(save_path, image_filename)
-                image.save(image_path)
-                total_images += 1
+                image_bytes = base_image["image"]
+                image_ext = base_image["ext"]
+
+                image = Image.open(io.BytesIO(image_bytes))
+                if image.size[0] > 200 and image.size[1] > 200 and is_mostly_black(image, threshold=0.8):
+                    image_filename = f"{os.path.splitext(os.path.basename(pdf_path))[0]}-{page_index+1}-{image_index}.{image_ext}"
+                    save_path = dir_path + "/images"
+                    if not os.path.exists(save_path):
+                        os.mkdir(save_path)
+                    image_path = os.path.join(save_path, image_filename)
+                    image.save(image_path)
+                    total_images += 1
 
     return total_images
 
