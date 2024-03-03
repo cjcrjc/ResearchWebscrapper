@@ -9,6 +9,7 @@ This repository contains a collection of Python scripts and programs for various
 Usage
 To use these scripts, make sure to install the required dependancies with:
 pip install torch torchvision opencv-python pynput matplotlib numpy Pillow pymupdf requires.io PySimpleGUI selenium bs4 requests pandas scikit-learn frontend
+
 if on linux:    
     sudo apt-get install python3-tk
 
