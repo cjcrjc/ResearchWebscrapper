@@ -1,9 +1,13 @@
-import torch, glob, time, os, shutil, platform
+import torch
+import glob
+import os
+import shutil
+import platform
 from torch.autograd import Variable
 from PIL import Image
 import numpy as np
 from multiprocessing import Process, cpu_count
-import cnnsorter.sortercnn as sorter
+import cnnsorter.sortercnn as sorter  # Assuming this is a custom module you've created
 from datetime import datetime, date
 
 # Get the path of the current directory
@@ -24,9 +28,7 @@ def prediction(img_path, transformer, model, classes):
     return pred
 
 def sort(images_path, classes, model, filtered_save_dir):
-    i = 0
     for image in images_path:
-        i += 1
         if prediction(image, sorter.transformer, model, classes) == classes[0]:
             print("[+] Passed:", os.path.basename(image))
             shutil.move(image, filtered_save_dir)
@@ -38,7 +40,7 @@ def run_sorter():
     print("BINARY SORT STARTED")
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     cores = cpu_count()
-    images_path = glob.glob(os.getcwd() + '/datacollection/images/*')
+    images_path = glob.glob(os.path.join(os.getcwd(), 'datacollection', 'images', '*'))
     images_paths = np.array_split(images_path, cores)
     filtered_save_dir = os.path.join(dir_path, 'filtered')
     if not os.path.isdir(filtered_save_dir):
@@ -48,7 +50,7 @@ def run_sorter():
     classes = ['nanostructure', 'not']
 
     # Find the best state/model
-    model_paths = glob.glob(dir_path + "/*.model")
+    model_paths = glob.glob(os.path.join(dir_path, '*.model'))
     models = [os.path.basename(model) for model in model_paths]
     model_dates = [datetime.strptime(model[:10], '%Y-%m-%d').date() for model in models]
     datediff_dict = {abs(date.today() - model_date): model_date for model_date in model_dates}
@@ -65,7 +67,7 @@ def run_sorter():
     model.load_state_dict(checkpoint)
     model.eval()
 
-    if platform.system == 'Linux':
+    if platform.system() == 'Linux':
         sort(images_path, classes, model, filtered_save_dir)
     else:
         processes = []
@@ -78,3 +80,7 @@ def run_sorter():
             process.join()
 
     print("PRELIMINARY SORTING FINISHED")
+
+# Entry point of the script
+if __name__ == "__main__":
+    run_sorter()

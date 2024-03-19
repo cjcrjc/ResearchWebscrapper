@@ -102,16 +102,14 @@ def scrape():
         search_term = sg.popup_get_text("Enter Search Term:", title="Webscraper Search Term")
     if not search_term:
         raise SystemExit()
-    # Good search term for end-to-end testing
-    #search_term = "priming self assembly blocks copolymers nanomaterials imaging defect"
-    
+
     # Perform the initial search and get the results URL
     url = perform_search(search_term)
     urls = [base_site + url]
     while url:
         print(f"[+] Added to scrape list: {url}")
         if len(urls) == 1:
-            # Need to store data from first iter otherwise nature cause nature wont allow another request
+            # Need to store data from the first iteration otherwise nature cause nature won't allow another request
             firstpagedata = get_data(url)
             url = get_next_page(firstpagedata, nature_next_page_selector)
         else:
@@ -119,18 +117,17 @@ def scrape():
         if url:
             url = base_site + url
             urls.append(url)
-            if len(urls) == 20: #Max number of pages that Nature will let you observe
+            if len(urls) == 20: # Max number of pages that Nature will let you observe
                 break
 
     processes = []
     args_list = [(get_data(url), download_folder, base_site, nature_article_selector, nature_pdf_container_selector) for url in urls[1:]]
     args_list.insert(0, (firstpagedata, download_folder, base_site, nature_article_selector, nature_pdf_container_selector))
 
-    # Sometimes gives error: Max retries exceeded with url, in this case it will just not scrape page=1 of pages
+    # Parallelization based on the platform
     if platform.system() == 'Linux':
         for i in range(len(urls)):
             scrape_page(*args_list[i])
-            
     else:
         for i in range(len(urls)):
             p = Process(target=scrape_page, args= args_list[i])

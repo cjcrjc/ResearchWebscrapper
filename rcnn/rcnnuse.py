@@ -1,10 +1,10 @@
 # Import necessary libraries
-from torchvision.models.detection import *
+from torchvision.models.detection import fasterrcnn_resnet50_fpn, FasterRCNN_ResNet50_FPN_Weights, faster_rcnn
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] ='0'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import torch
 from PIL import Image
-import torchvision
+import torchvision.transforms as transforms
 
 # Get the directory path
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -12,6 +12,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # Define a function for RCNN cropping
 def rcnn_crop():
     print("RCNN CROP STARTED")
+
     # Determine the device (CPU or GPU)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -21,21 +22,21 @@ def rcnn_crop():
     model.roi_heads.box_predictor = faster_rcnn.FastRCNNPredictor(in_features, 2).to(device)
 
     # Load the pre-trained weights for different parts of the model
-    model.backbone.body.load_state_dict(torch.load(dir_path + "/PARTIALMODEL-IntermediateLayerGetter-2023-10-20.model", device))
-    model.backbone.fpn.load_state_dict(torch.load(dir_path + "/PARTIALMODEL-FeaturePyramidNetwork-2023-10-20.model", device))
-    model.roi_heads.load_state_dict(torch.load(dir_path + "/PARTIALMODEL-RoIHeads-2023-10-20.model", device))
-    model.rpn.load_state_dict(torch.load(dir_path + "/PARTIALMODEL-RegionProposalNetwork-2023-10-20.model", device))
+    model.backbone.body.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-IntermediateLayerGetter-2023-10-20.model"), map_location=device))
+    model.backbone.fpn.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-FeaturePyramidNetwork-2023-10-20.model"), map_location=device))
+    model.roi_heads.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-RoIHeads-2023-10-20.model"), map_location=device))
+    model.rpn.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-RegionProposalNetwork-2023-10-20.model"), map_location=device))
 
     # Define the folder containing images to be cropped
-    folder = os.getcwd() + "/cnnsorter/filtered"
+    folder = os.path.join(os.getcwd(), "cnnsorter", "filtered")
 
     # Define a transformation for the image
-    transform = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
+    transform = transforms.Compose([transforms.ToTensor()])
 
     # Loop through images in the folder and perform cropping
     for img_path in os.listdir(folder):
         model.eval()
-        img = Image.open(folder + "/" + img_path).convert('RGB')
+        img = Image.open(os.path.join(folder, img_path)).convert('RGB')
         image = transform(img).to(device)
         output = model([image])
         boxes = output[0]["boxes"].detach().cpu().numpy().astype(int)
@@ -49,7 +50,7 @@ def rcnn_crop():
         boxes = keepboxes
 
         # Define the save path for cropped images
-        save_path = dir_path + "/cropped"
+        save_path = os.path.join(dir_path, "cropped")
         if not os.path.exists(save_path):
             os.mkdir(save_path)
 
@@ -57,11 +58,15 @@ def rcnn_crop():
         for i in range(len(boxes)):
             # Crop subimages and save them with appropriate names
             cropped_image = img.crop(tuple(boxes[i]))
-            cropped_image.save(os.path.join(dir_path, "cropped", img_name.replace(".", f"-{i}.")))
+            cropped_image.save(os.path.join(save_path, img_name.replace(".", f"-{i}.")))
 
         # Remove the original image from the folder
-        os.remove(folder + "/" + img_path)
+        os.remove(os.path.join(folder, img_path))
         
-        print(f"[+] Cropped {len(boxes)} subimages out of:", os.path.basename(img_path))
+        print(f"[+] Cropped {len(boxes)} subimages out of:", img_name)
     
     print("RCNN SORTING FINISHED")
+
+# Entry point of the script
+if __name__ == "__main__":
+    rcnn_crop()

@@ -1,5 +1,4 @@
-import fitz, io, sys, os
-import PySimpleGUI as sg
+import fitz, io, os
 from PIL import Image, ImageFile
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -9,19 +8,18 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Function to extract images from PDF files in a folder
 def pull_all_images():
-    fname = dir_path + "/downloaded"
+    folder_path = dir_path + "/downloaded"
     total_images = 0
 
     # Iterate through the files in the selected folder
-    for file in os.listdir(fname):
-        file_path = os.path.join(fname, file)
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
 
         # Check if the file is not empty
         if os.path.getsize(file_path) > 0:
             total_images += extract_images_from_pdf(file_path)
         
         os.remove(file_path)
-        
 
     print(f"IMAGE EXTRACTION FINISHED ** Total images extracted: {total_images}")
 
@@ -46,7 +44,6 @@ def extract_images_from_pdf(pdf_path):
             base_image = pdf_file.extract_image(xref)
 
             if not isinstance(base_image, bool):
-
                 image_bytes = base_image["image"]
                 image_ext = base_image["ext"]
 
@@ -71,3 +68,7 @@ def is_mostly_black(image, threshold=0.8):
 
     # Check if the percentage is below the threshold
     return percentage_black < threshold
+
+# Entry point of the script
+if __name__ == "__main__":
+    pull_all_images()
