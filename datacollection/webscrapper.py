@@ -77,38 +77,15 @@ def download_pdf(art_link, art_name, base_site, download_folder, pdf_container_s
             print("FAILED TO DOWNLOAD")
 
 # Function to perform a search and return the search results URL using Selenium
-def perform_search(base_site, search_term, search_selector):
-    if False:
-        # Use Selenium to perform a search and get the search results URL
-        driver = webdriver.Chrome()  # You need to have ChromeDriver installed and in your PATH
-        #driver.maximize_window()
-        driver.get(base_site)
-        try:
-            accept_box = driver.find_element(By.CSS_SELECTOR, search_selector[0])
-            accept_box.click()
-        except Exception as e:
-            pass
-        search_box = driver.find_element(By.CSS_SELECTOR, search_selector[1])
-        search_box.click()
-        search_box = driver.find_element(By.CSS_SELECTOR, search_selector[2])
-        search_box.send_keys(search_term.strip())
-        search_box.send_keys(Keys.RETURN)
-        
-        # Get the current URL, which is the search results URL
-        search_results_url = driver.current_url
-        
-        driver.quit()
-    else:
-        search_term = search_term.strip().replace(" ", "+")
-        search_results_url = f"https://www.nature.com/search?q={search_term}&journal="
+def perform_search(search_term):
+    search_term = search_term.strip().replace(" ", "+")
+    search_results_url = f"https://www.nature.com/search?q={search_term}&journal="
     
     return search_results_url
 
 # Main Logic and Parallelization
 def scrape():
     # Define journal-specific selectors (modify as needed)
-    nature_search_selector = ["button[class='cc-button cc-button--secondary cc-button--contrast cc-banner__button cc-banner__button-accept']",
-                               "a[role='button'][class='c-header__link c-header__link--search']", "input[class='c-header__input'][id='keywords']"]
     nature_article_selector = [['ul', {"class": "app-article-list-row"}], ['li', {"class": "app-article-list-row__item"}]]
     nature_next_page_selector = [['li', {"class":"c-pagination__item", "data-page":"next"}], ['a', {"class": "c-pagination__link"}]]
     nature_pdf_container_selector = [['div', {"class": "c-pdf-container"}] , ['a', {"class": "u-button u-button--full-width u-button--primary u-justify-content-space-between c-pdf-download__link"}]]
@@ -129,11 +106,12 @@ def scrape():
     #search_term = "priming self assembly blocks copolymers nanomaterials imaging defect"
     
     # Perform the initial search and get the results URL
-    url = perform_search(base_site, search_term, nature_search_selector)
+    url = perform_search(search_term)
     urls = [base_site + url]
     while url:
         print(f"[+] Added to scrape list: {url}")
         if len(urls) == 1:
+            # Need to store data from first iter otherwise nature cause nature wont allow another request
             firstpagedata = get_data(url)
             url = get_next_page(firstpagedata, nature_next_page_selector)
         else:
@@ -141,7 +119,7 @@ def scrape():
         if url:
             url = base_site + url
             urls.append(url)
-            if len(urls) == 20:
+            if len(urls) == 20: #Max number of pages that Nature will let you observe
                 break
 
     processes = []

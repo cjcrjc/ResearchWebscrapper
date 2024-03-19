@@ -9,16 +9,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Function to extract images from PDF files in a folder
 def pull_all_images():
-    if False:
-        # Check if a folder path is provided as a command-line argument, otherwise prompt the user
-        fname = sys.argv[1] if len(sys.argv) == 2 else None
-        if not fname:
-            fname = sg.PopupGetFolder("Select folder:", title="PyMuPDF PDF Image Extraction")
-        if not fname:
-            raise SystemExit()
-    else:
-        fname = dir_path + "/downloaded"
-
+    fname = dir_path + "/downloaded"
     total_images = 0
 
     # Iterate through the files in the selected folder

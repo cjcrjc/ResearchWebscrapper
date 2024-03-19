@@ -1,8 +1,5 @@
 # Import necessary libraries
 from torchvision.models.detection import *
-import numpy as np
-import matplotlib.pyplot as plt
-import cv2
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] ='0'
 import torch
@@ -50,14 +47,6 @@ def rcnn_crop():
             if scores[i] > 0.6:
                 keepboxes.append(boxes[i])
         boxes = keepboxes
-
-        # Plotting
-        # img = np.array(img)
-        # for i in range(len(boxes)):
-        #     cv2.rectangle(img, tuple(boxes[i][0:2]), tuple(boxes[i][2:4]),color=(0,255,  0), thickness=2)
-        # plt.figure(figsize=(20,30))
-        # plt.imshow(img)
-        # plt.show()
 
         # Define the save path for cropped images
         save_path = dir_path + "/cropped"

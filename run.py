@@ -8,6 +8,7 @@ from shutil import rmtree
 dir_path = path.dirname(path.realpath(__file__))
 
 if __name__ == '__main__':
+    #Change Linux Multithreading
     set_start_method('spawn')
     freeze_support()
     
