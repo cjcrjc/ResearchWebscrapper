@@ -9,6 +9,36 @@ import torchvision.transforms as transforms
 # Get the directory path
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+def is_mostly_white_or_black(img, threshold=0.7):
+    # Convert image to RGB
+    img = img.convert("RGB")
+    
+    # Get image dimensions
+    width, height = img.size
+    total_pixels = width * height
+    
+    # Initialize white pixel counter
+    white_pixels = 0
+    black_pixels = 0
+    
+    # Define what counts as "white"
+    white_threshold = (250, 250, 250)  # RGB values
+    black_threshold = (10, 10, 10)  # RGB values
+
+    # Count the number of white pixels
+    for pixel in img.getdata():
+        if pixel >= white_threshold:
+            white_pixels += 1
+        if pixel <= black_threshold:
+            black_pixels += 1
+
+    # Calculate the ratio of white pixels
+    white_ratio = white_pixels / total_pixels
+    black_ratio = black_pixels / total_pixels
+
+    # Check if the ratio exceeds the threshold
+    return white_ratio > threshold or black_ratio > threshold
+
 # Define a function for RCNN cropping
 def rcnn_crop():
     print("RCNN CROP STARTED")
@@ -58,7 +88,8 @@ def rcnn_crop():
         for i in range(len(boxes)):
             # Crop subimages and save them with appropriate names
             cropped_image = img.crop(tuple(boxes[i]))
-            cropped_image.save(os.path.join(save_path, img_name.replace(".", f"-{i}.")))
+            if cropped_image.size[0] > 150 and cropped_image.size[1] > 150 and not is_mostly_white_or_black(cropped_image):
+                cropped_image.save(os.path.join(save_path, img_name.replace(".", f"-{i}.")))
 
         # Remove the original image from the folder
         os.remove(os.path.join(folder, img_path))

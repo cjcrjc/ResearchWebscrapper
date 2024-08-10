@@ -36,7 +36,7 @@ def is_mostly_white(img, threshold=0.7):
 
 def scrape_page(html_text, download_folder, base_site, article_selector, image_container_selector):
     for art_link in get_articles(html_text, base_site, article_selector):
-        art_name = get_article_name(art_link)
+        art_name = art_name = str(get_data(art_link).h1.contents[0]).replace("<i>", "").replace("</i>", "").replace("/", " ").replace("-", "")
         download_image(art_link, art_name, download_folder, image_container_selector)
 
 def get_data(url):
@@ -61,33 +61,24 @@ def get_articles(html_text, base_site, article_selector):
     final_article_links = [base_site + link for link in article_links]
     return final_article_links
 
-def get_article_name(art_link):
-    page_data = get_data(art_link)
-    art_name = str(page_data.h1.contents[0]).replace("<i>", "").replace("</i>", "").replace("/", " ").replace("-", "")
-    return art_name
-
 def get_image(link, download_folder, art_name):
     global i
     res = requests.get(link)
     image_extension = os.path.splitext(link)[1]
-    if image_extension == '' or image_extension == '.svg':
-        raise(ValueError())
     illegal_characters = ["#","%","&","{","}","\\","<",">","*","$","!","'",'"',":","@","+","`","|","="]
     image_name = os.path.basename(art_name[:20]).translate(str.maketrans({char: " " for char in illegal_characters}))
-    
     image_path = os.path.join(download_folder, f"{image_name}{i}{image_extension}")
     
-    if len(res.content) < 1000:
+    if len(res.content) < 1000 or image_extension == '' or image_extension == '.svg':
         raise(ValueError())
     
-    with open(image_path, 'wb') as image_file:
-        img = Image.open(BytesIO(res.content))
-        if is_mostly_white(img) or img.size[0] < 200 or img.size[1] < 200:
-            raise(ValueError())
-        img.close()
-        image_file.write(res.content)
-        i += 1
-    return res
+    img_bytes = BytesIO(res.content)
+    img = Image.open(img_bytes)
+    white = is_mostly_white(img)
+    if not white and img.size[0] > 250 and img.size[1] > 250:
+        with open(image_path, 'wb') as image_file:
+            image_file.write(res.content)
+            i += 1
 
 def download_image(art_link, art_name, download_folder, image_container_selector):
     global i
