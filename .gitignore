@@ -127,5 +127,6 @@ dmypy.json
 .zip
 *.zip
 
+/rcnn/cropped/
 /rcnn/train/*
 /rcnn/train2/*

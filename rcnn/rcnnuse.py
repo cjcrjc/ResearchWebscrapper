@@ -75,7 +75,7 @@ def rcnn_crop():
         
         # Filter boxes based on confidence scores
         for i in range(len(boxes)):
-            if scores[i] > 0.6:
+            if scores[i] > 0.95:
                 keepboxes.append(boxes[i])
         boxes = keepboxes
 
@@ -85,11 +85,13 @@ def rcnn_crop():
             os.mkdir(save_path)
 
         img_name = os.path.basename(img_path)
-        for i in range(len(boxes)):
+        i = 0
+        for box in boxes:
             # Crop subimages and save them with appropriate names
-            cropped_image = img.crop(tuple(boxes[i]))
+            cropped_image = img.crop(tuple(box))
             if cropped_image.size[0] > 150 and cropped_image.size[1] > 150 and not is_mostly_white_or_black(cropped_image):
                 cropped_image.save(os.path.join(save_path, img_name.replace(".", f"-{i}.")))
+                i += 1
 
         # Remove the original image from the folder
         os.remove(os.path.join(folder, img_path))

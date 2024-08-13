@@ -1,5 +1,4 @@
 from datacollection.webscrapper import scrape
-from cnnsorter.sorteruse import run_sorter
 from rcnn.rcnnuse import rcnn_crop
 from multiprocessing import freeze_support, set_start_method
 from os import path
@@ -21,8 +20,5 @@ if __name__ == '__main__':
     print(f"Scrape Time: {scrapetime-start}")
     print(f"Crop Time: {rcnn-scrapetime}")
     #Cleanup empty directories
-    rmtree(path.join(dir_path,"datacollection","images"))
     rmtree(path.join(dir_path,"datacollection","__pycache__"))
-    rmtree(path.join(dir_path,"cnnsorter","filtered"))
-    rmtree(path.join(dir_path,"cnnsorter","__pycache__"))
     rmtree(path.join(dir_path,"rcnn","__pycache__"))
