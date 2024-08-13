@@ -15,15 +15,11 @@ if __name__ == '__main__':
     #Scrape articles from nature.com
     scrape()
     scrapetime = time()
-    #Primilinary binary sort of images to keep useful ones
-    run_sorter()
-    cnnsorter = time()
     #RCNN pass to crop images based on predicted bounding boxes and keep only useful subimages
     rcnn_crop()
     rcnn = time()
     print(f"Scrape Time: {scrapetime-start}")
-    print(f"Sort Time: {cnnsorter-scrapetime}")
-    print(f"Crop Time: {rcnn-cnnsorter}")
+    print(f"Crop Time: {rcnn-scrapetime}")
     #Cleanup empty directories
     rmtree(path.join(dir_path,"datacollection","images"))
     rmtree(path.join(dir_path,"datacollection","__pycache__"))

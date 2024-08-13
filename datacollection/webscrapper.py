@@ -66,7 +66,7 @@ def get_image(link, download_folder, art_name):
     res = requests.get(link)
     image_extension = os.path.splitext(link)[1]
     illegal_characters = ["#","%","&","{","}","\\","<",">","*","$","!","'",'"',":","@","+","`","|","="]
-    image_name = os.path.basename(art_name[:20]).translate(str.maketrans({char: " " for char in illegal_characters}))
+    image_name = os.path.basename(art_name[:25]).translate(str.maketrans({char: " " for char in illegal_characters}))
     image_path = os.path.join(download_folder, f"{image_name}{i}{image_extension}")
     
     if len(res.content) < 1000 or image_extension == '' or image_extension == '.svg':

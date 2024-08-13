@@ -126,3 +126,6 @@ dmypy.json
 2023-10-17.model
 .zip
 *.zip
+
+/rcnn/train/*
+/rcnn/train2/*

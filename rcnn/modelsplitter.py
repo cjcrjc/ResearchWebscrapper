@@ -5,7 +5,7 @@ from datetime import date
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Load the pre-trained model
-model_data = torch.load(dir_path+"/2023-10-17.model")
+model_data = torch.load(dir_path+"/2024-08-13.model")
 
 # Create a Fast R-CNN model with a ResNet-50 backbone and two output classes
 model = fasterrcnn_resnet50_fpn(weights=FasterRCNN_ResNet50_FPN_Weights.DEFAULT)

@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from datetime import date
+import time
 
 # Get the directory path
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -30,7 +31,8 @@ class CustData(torch.utils.data.Dataset):
     def __getitem__(self, i):
         image_name = self.unique_imgs[self.indices[i]]
         boxes = self.df[self.df.image == image_name].values[:, 1:].astype("float")
-        img = Image.open(image_name).convert("RGB")
+        img_path = os.path.join(dir_path, 'train', image_name)
+        img = Image.open(img_path).convert("RGB")
         labels = torch.ones((boxes.shape[0]), dtype=torch.int64)
         target = {}
         target["boxes"] = torch.tensor(boxes)
@@ -52,7 +54,8 @@ model.eval()
 # Read bounding box data from an Excel file
 df = pd.read_excel('rcnn/bounding_boxes.xlsx')
 unique_imgs = df.image.unique()
-train_inds, val_inds = train_test_split(range(unique_imgs.shape[0]), test_size=0.1)
+test_train_split = 0.1
+train_inds, val_inds = train_test_split(range(unique_imgs.shape[0]), test_size=test_train_split)
 
 # Define batch sizes and create data loaders for training and testing
 train_batchsize = 2
@@ -62,19 +65,20 @@ test_loader = DataLoader(CustData(df, unique_imgs, val_inds), batch_size=int(tra
                          collate_fn=custom_collate, pin_memory=True if torch.cuda.is_available() else False)
 
 total_count = len(glob.glob(dir_path + '/train/*.*'))
-test_count = int(total_count * 0.1)
-train_count = int(total_count * 0.9)
+test_count = int(total_count * test_train_split)
+train_count = int(total_count * (1-test_train_split))
 
 # Define the optimizer and loss function
 optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0005)
 loss_function = torch.nn.CrossEntropyLoss()
 
 # Specify the number of training epochs
-num_epochs = 10
+num_epochs = 50
 model.to(device)
 
 # Training loop
 for epoch in range(num_epochs):
+    start = time.time()
     model.train()
     epoch_loss = 0
     for data in train_loader:
@@ -88,13 +92,13 @@ for epoch in range(num_epochs):
             targets.append(targ)
         loss_dict = model(imgs, targets)
         loss = sum(v for v in loss_dict.values())
-        print(f'Batch Loss: {loss.item()}')
+        # print(f'Batch Loss: {loss.item()}')
         epoch_loss += loss.cpu().detach().numpy()
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-    print(f'Epoch: {epoch+1}    Train Loss: {epoch_loss}')
+    print(f'Epoch: {epoch+1}    Train Loss: {epoch_loss}    Time: {time.time() - start}')
 
 # Save the best model
 torch.save(model.state_dict(), f'rcnn/{date.today()}.model')

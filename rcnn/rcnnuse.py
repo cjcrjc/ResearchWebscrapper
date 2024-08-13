@@ -52,13 +52,13 @@ def rcnn_crop():
     model.roi_heads.box_predictor = faster_rcnn.FastRCNNPredictor(in_features, 2).to(device)
 
     # Load the pre-trained weights for different parts of the model
-    model.backbone.body.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-IntermediateLayerGetter-2023-10-20.model"), map_location=device))
-    model.backbone.fpn.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-FeaturePyramidNetwork-2023-10-20.model"), map_location=device))
-    model.roi_heads.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-RoIHeads-2023-10-20.model"), map_location=device))
-    model.rpn.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-RegionProposalNetwork-2023-10-20.model"), map_location=device))
+    model.backbone.body.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-IntermediateLayerGetter-2024-08-13.model"), map_location=device))
+    model.backbone.fpn.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-FeaturePyramidNetwork-2024-08-13.model"), map_location=device))
+    model.roi_heads.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-RoIHeads-2024-08-13.model"), map_location=device))
+    model.rpn.load_state_dict(torch.load(os.path.join(dir_path, "PARTIALMODEL-RegionProposalNetwork-2024-08-13.model"), map_location=device))
 
     # Define the folder containing images to be cropped
-    folder = os.path.join(os.getcwd(), "cnnsorter", "filtered")
+    folder = os.path.join(os.getcwd(), "datacollection", "images")
 
     # Define a transformation for the image
     transform = transforms.Compose([transforms.ToTensor()])
